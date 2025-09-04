@@ -12,7 +12,8 @@ import Contact from "./components/Contact";
 import Error from "./components/Error";
 import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
-
+// import Notepage from "./components/Notepage.jsx";
+import Create from "./components/Create.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -24,12 +25,15 @@ const router = createBrowserRouter([
       { path: "contact", element: <Contact /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
+      { path: "create", element: <Create/> },
+      //  { path: "notepage", element: <Notepage/> },
+
     ],
   },
 ]);
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>
+  // </StrictMode>
 );
