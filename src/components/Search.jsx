@@ -2,7 +2,7 @@ import React from "react";
 
 const Search = ({ onsearch }) => {
   return (
-    <div className="border-2 border-red-300 flex justify-center items-center py-4">
+    <div className=" flex justify-center items-center py-4">
       <form className="w-full max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
         <label
           htmlFor="default-search"
