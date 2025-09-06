@@ -44,7 +44,8 @@ const Body = () => {
 
 
       {/* //create note button */}
-      <Link to="/create">
+      <Link to={"/notes/new"}>
+
         <button className="bg-blue-500 hover:underline cursor-pointer rounded-3xl">
           CREATE NOTE
         </button>

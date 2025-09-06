@@ -1,8 +1,22 @@
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 export default function Login(){
+
+  const [email,setemail]=useState([""]);
+  const[password,setpassword]=useState([""]);
+
+  const Handlesubmit=(e)=>{
+    e.preventDefault();
+    console.log(email);
+    console.log(password);
+
+
+  }
+
+
   return (
+
     <>
     
     
@@ -15,7 +29,10 @@ export default function Login(){
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
+
+          {/* //form is starting */}
+          <form  onSubmit={Handlesubmit}  className="space-y-6 ">
+            {/* email  */}
             <div>
               <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">
                 Email address
@@ -25,13 +42,17 @@ export default function Login(){
                   id="email"
                   name="email"
                   type="email"
+                  //extra down 
+                  value={email}
+                  onChange={(e) => setemail(e.target.value)}
+                  //up extra 
                   required
                   autoComplete="email"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                 />
               </div>
-            </div>
-
+            </div> 
+             {/* password */}
             <div>
               <div className="flex items-center justify-between">
                 <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">
@@ -51,6 +72,8 @@ export default function Login(){
                   id="password"
                   name="password"
                   type="password"
+                  value={password}
+                  onChange={(e)=>setpassword(e.target.value)}
                   required
                   autoComplete="current-password"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"

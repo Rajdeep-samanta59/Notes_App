@@ -14,26 +14,31 @@ import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
 // import Notepage from "./components/Notepage.jsx";
 import Create from "./components/Create.jsx";
+import NoteDetail from "./components/NoteDetail.jsx";
+import EditNote from "./components/EditNote.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     errorElement: <Error />,
     children: [
-      { index: true, element: <Body /> },
+  { index: true, element: <Body /> },
+  { path: 'notes', element: <Body /> },
       { path: "about", element: <About /> },
       { path: "contact", element: <Contact /> },
       { path: "login", element: <Login /> },
       { path: "signup", element: <Signup /> },
-      { path: "create", element: <Create/> },
+  // { path: "create", element: <Create /> },
+  { path: "notes/new", element: <Create /> },
+      { path: "notes/:id", element: <NoteDetail /> },
+      { path: "notes/:id/edit", element: <EditNote /> },
       //  { path: "notepage", element: <Notepage/> },
-
     ],
   },
 ]);
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
-    <RouterProvider router={router} />
+  <RouterProvider router={router} />
   // </StrictMode>
 );

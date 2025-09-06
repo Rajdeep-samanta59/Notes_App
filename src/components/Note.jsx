@@ -1,7 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Note = ({
-  // id,
+  id,
   title,
   image,
   content,
@@ -10,7 +11,17 @@ const Note = ({
   updatedAt,
   categories,
 }) => {
+
+
+
+// console.log(id);
+
+
   return (
+
+   <Link to={`/notes/${id}`}>
+
+    
     <div className="max-w-sm rounded overflow-hidden shadow-lg border border-gray-200">
       <img className="w-full h-48 object-cover" src={image} alt={title} />
       <div className="px-6 py-4">
@@ -21,12 +32,13 @@ const Note = ({
           {content}
         </div>
         {/* Created & Updated */}
-<p className="text-gray-500 text-sm mb-2">
-  <span className="font-semibold">Created:</span> {new Date(createdAt).toLocaleDateString()}
-  <br />
-  <span className="font-semibold">Updated:</span> {new Date(updatedAt).toLocaleDateString()}
-</p>
-
+        <p className="text-gray-500 text-sm mb-2">
+          <span className="font-semibold">Created:</span>{" "}
+          {new Date(createdAt).toLocaleDateString()}
+          <br />
+          <span className="font-semibold">Updated:</span>{" "}
+          {new Date(updatedAt).toLocaleDateString()}
+        </p>
 
         {/* Categories */}
         <div className="text-sm text-gray-700 font-semibold">
@@ -44,8 +56,11 @@ const Note = ({
             #{tag}
           </span>
         ))}
+
       </div>
+    
     </div>
+  </Link>
   );
 };
 
