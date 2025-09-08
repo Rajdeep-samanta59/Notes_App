@@ -1,66 +1,35 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Note = ({
-  id,
-  title,
-  image,
-  content,
-  tags,
-  createdAt,
-  updatedAt,
-  categories,
-}) => {
-
-
-
-// console.log(id);
-
+const Note = ({ id, title, image, content, tags, createdAt }) => {
+  // guard dates
+  const created = createdAt ? new Date(createdAt).toLocaleDateString() : "N/A";
 
   return (
-
-   <Link to={`/notes/${id}`}>
-
-    
-    <div className="max-w-sm rounded overflow-hidden shadow-lg border border-gray-200">
-      <img className="w-full h-48 object-cover" src={image} alt={title} />
-      <div className="px-6 py-4">
-        {/* Title */}
-        <div className="font-bold text-xl mb-2">{title}</div>
-        {/* Content */}
-        <div className="mt-2 text-gray-800 text-sm leading-relaxed line-clamp-3">
-          {content}
+    <Link to={`/notes/${id}`} className="group">
+      <article className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden transform transition hover:-translate-y-1 hover:shadow-lg">
+        <div className="h-40 w-full bg-gray-100 overflow-hidden">
+          <img src={image || '/vite.svg'} alt={title || 'note image'} className="w-full h-full object-cover" loading="lazy" />
         </div>
-        {/* Created & Updated */}
-        <p className="text-gray-500 text-sm mb-2">
-          <span className="font-semibold">Created:</span>{" "}
-          {new Date(createdAt).toLocaleDateString()}
-          <br />
-          <span className="font-semibold">Updated:</span>{" "}
-          {new Date(updatedAt).toLocaleDateString()}
-        </p>
 
-        {/* Categories */}
-        <div className="text-sm text-gray-700 font-semibold">
-          {categories?.join(", ")}
+        <div className="p-4 h-48 flex flex-col justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{title}</h3>
+            <p className="text-sm text-gray-600 mt-2 line-clamp-3">{content}</p>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex flex-wrap gap-2">
+              {tags?.slice(0, 3)?.map((tag, i) => (
+                <span key={i} className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">#{tag}</span>
+              ))}
+            </div>
+
+            <div className="text-xs text-gray-500">{created}</div>
+          </div>
         </div>
-      </div>
-
-      {/* Tags */}
-      <div className="px-6 pt-4 pb-2">
-        {tags?.map((tag, index) => (
-          <span
-            key={index}
-            className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-          >
-            #{tag}
-          </span>
-        ))}
-
-      </div>
-    
-    </div>
-  </Link>
+      </article>
+    </Link>
   );
 };
 

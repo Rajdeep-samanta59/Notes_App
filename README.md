@@ -1,3 +1,7 @@
+clone the repo by git clone "https://github.com/Rajdeep-samanta59/Notes_App.git"
+go to the folder 
+show live by npm run dev
+
 #                                          DAY-1
 1 . set up React-vite done 
 2 . connecting  Lataestt Version of Tailwind done 
@@ -30,3 +34,19 @@ THIRD:
 1)Made Commenting of Some section’s
 2)Manual Testing Done in the  console  if all  form data is submitting properly or not .
 3)Password Validation in UI itself.
+
+
+#                                            DAY-5 
+
+
+FIRST :   -
+1) Fixed Lot of Styling ,
+2) Api Fetching Logic Changed 
+	
+SECOND:
+1) Made Responsiveness
+2)	Viewed form diff  devices
+3)	Edit and DeletE Function Made (In the NoteDetail.jsx )
+
+THIRD:
+1)	Thinking and Learning How to Design the models,schemas;

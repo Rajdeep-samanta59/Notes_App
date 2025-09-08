@@ -1,88 +1,105 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Search from "./Search";
 import Note from "./Note";
-import { useEffect } from "react";
 
 const Body = () => {
-  const [data, setData] = useState([]);// fetch data store er jonne
-  const[searcheddata,setsearcheddata]=useState(""); //  what is searched store er jone 
+  const [data, setData] = useState([]);
+  const [searcheddata, setsearcheddata] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  //fetching logic
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch(
-          "https://api.myjson.online/v1/records/eec8828e-5973-4f42-b019-135092b826de"
+          // "https://api.myjson.online/v1/records/eec8828e-5973-4f42-b019-135092b826de"
+          "data/notes.json"
+
         );
         const json = await response.json();
-        const result = json.data.data;
-        setData(result);
-      } catch (error) {
-        console.error("Fetch failed:", error);
+        // normalize shape
+        const items = Array.isArray(json.data)
+          ? json.data
+          : json.data?.data || [];
+        setData(items);
+      } catch (err) {
+        console.error("Fetch failed:", err);
+        setError("Failed to load notes");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  // console.log("Data NOWW:", data);// all data coming corret
-  // console.log("First ID:", data?.[0]?.id);
-
   const handlesearch = (value) => {
-    setsearcheddata(value);
+    setsearcheddata(value || "");
+  };
 
-    console.log('typing:', value);
-    // setsearched(value);
-  }; 
-
+  const filtered = data.filter((curr) => {
+    if (!searcheddata) return true;
+    const q = String(searcheddata).toLowerCase().trim();
+    const matchTitle = curr.title && curr.title.toLowerCase().includes(q);
+    const matchContent = curr.content && curr.content.toLowerCase().includes(q);
+    const matchTags =
+      Array.isArray(curr.tags) &&
+      curr.tags.some((tag) => tag && tag.toLowerCase().includes(q));
+    return matchTitle || matchContent || matchTags;
+  });
 
   return (
-    <div className="border-4 border-amber-400  flex flex-col items-center justify-center">
-      BODY !{/* // search bar */}
-      <Search onsearch={handlesearch} />
+    <div className="py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        {/*Search */}
+        <Search onsearch={handlesearch} />
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Notes</h1>
+          <Link
+            to="/notes/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700"
+          >
+            + Create
+          </Link>
+        </div>
 
-
-      {/* //create note button */}
-      <Link to={"/notes/new"}>
-
-        <button className="bg-blue-500 hover:underline cursor-pointer rounded-3xl">
-          CREATE NOTE
-        </button>
-      </Link>
-
-      {/* // notes container */}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-        {data
-          .filter((curr) => {
-            if (!searcheddata) return true;                         // show all when empty
-            const q = String(searcheddata).toLowerCase().trim();    // use searcheddata
-
-            const matchTitle = curr.title && curr.title.toLowerCase().includes(q);
-            const matchContent = curr.content && curr.content.toLowerCase().includes(q);
-            const matchTags =
-              Array.isArray(curr.tags) &&
-              curr.tags.some((tag) => tag && tag.toLowerCase().includes(q));
-
-            return matchTitle || matchContent || matchTags;        // return boolean
-          })
-          .map((curr) => (
-            <Note
-
-              key={curr.id}
-              id={curr.id}
-              tags={curr.tags}
-              image={curr.image}
-              title={curr.title}
-              content={curr.content}
-              createdAt={curr.createdAt}
-              updatedAt={curr.updatedAt}
-              // categories={curr.categories} as of now skipping 
-            />
-          ))}
+      {/* before loading  etc edge cases handle  */}
+        {loading && (
+          <div className="text-center py-24 text-gray-500">
+            Loading notes...
+          </div>
+        )}
+        {!loading && error && (
+          <div className="text-center py-24 text-red-500">{error}</div>
+        )}
+        {!loading && !error && filtered.length === 0 && (
+          <div className="text-center py-24 text-gray-500">
+            No notes found.{" "}
+            <Link to="/notes/new" className="text-purple-600 underline">
+              Create your  note
+            </Link>
+          </div>
+        )}
+        {!loading && !error && filtered.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filtered.map((curr) => (
+              <Note
+                key={curr.id}
+                id={curr.id}
+                tags={curr.tags}
+                image={curr.image}
+                title={curr.title}
+                content={curr.content}
+                createdAt={curr.createdAt}
+                updatedAt={curr.updatedAt}
+              />
+            ))}
+          </div>
+        )}
+        
       </div>
-      <div></div>
     </div>
   );
 };

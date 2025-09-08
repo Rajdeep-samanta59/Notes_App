@@ -1,26 +1,73 @@
 import React, { useState } from "react";
 import TagInput from "./TagInput";
+
 const Create = () => {
   const [tags, setTags] = useState([]);
-  // for  input  of  the form things state defining
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [filePreview, setFilePreview] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
-
-  const Handlesubmit = (e) => {
-    e.preventDefault();
-    console.log("Form Submitted!");
-    console.log("Title:", title);
-    console.log("Content:", content);
-    console.log("Tags:", tags);
+  // validations
+  const validate = () => {
+    const e = {};
+    if (!title || String(title).trim().length === 0)
+      e.title = "Title is required";
+    if (!content || String(content).trim().length < 10)
+      e.content = "Content must be at least 10 characters";
+    return e;
   };
-  return (
-    <form onSubmit={Handlesubmit}>
-      <div className="min-h-screen bg-purple-50 flex items-center justify-center p-4">
-        <div className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl w-full max-w-2xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Note Form</h2>
 
-          {/* Title */}
+  const handleFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => setFilePreview(reader.result);
+    reader.readAsDataURL(f);
+  };
+
+  const Handlesubmit = async (e) => {
+    e.preventDefault();
+    const eobj = validate();
+    setErrors(eobj);
+    if (Object.keys(eobj).length) return;
+
+    setSubmitting(true);
+    try {
+      //  this is my temporary mock payload type will change  this sure !
+      const payload = {
+        id: Date.now(),
+        title: title.trim(),
+        content: content.trim(),
+        tags: Array.isArray(tags) ? tags.map((t) => String(t).trim()) : [],
+        image: filePreview || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      console.log("Create payload:", payload);
+
+      // reset form on success
+      setTitle("");
+      setContent("");
+      setTags([]);
+      // cleared preview; file variable not stored locally on purpose
+      setFilePreview(null);
+      // TODO: navigate to note detail after server returns id
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={Handlesubmit} className="min-h-screen bg-purple-50 p-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Create Note</h2>
+          {/* // TITLE */}
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-1">
               Title
@@ -28,13 +75,18 @@ const Create = () => {
             <input
               type="text"
               placeholder="Title"
-              value={title} // connect  title state 
-              onChange={(e)=>setTitle(e.target.value)}// and update acc
-              className="w-full p-3 rounded-lg bg-purple-50 text-gray-800 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              aria-invalid={errors.title ? "true" : "false"}
+              className={`w-full p-3 rounded-lg bg-purple-50 text-gray-800 border ${
+                errors.title ? "border-red-400" : "border-gray-200"
+              } focus:outline-none focus:ring-2 focus:ring-purple-400`}
             />
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
-
-          {/* Content */}
+          {/* /// content */}
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-1">
               Content
@@ -42,15 +94,20 @@ const Create = () => {
             <textarea
               rows="6"
               placeholder="Write Something..."
-
-              value={content} // connect content 
-              onChange={(e) => setContent(e.target.value)}// and update acc
-              className="w-full p-3 rounded-lg bg-purple-50 text-gray-800 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              aria-invalid={errors.content ? "true" : "false"}
+              className={`w-full p-3 rounded-lg bg-purple-50 text-gray-800 border ${
+                errors.content ? "border-red-400" : "border-gray-200"
+              } focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none`}
             ></textarea>
+            {errors.content && (
+              <p className="text-red-500 text-sm mt-1">{errors.content}</p>
+            )}
           </div>
 
-          {/* //tags */}
-          <div>
+          {/* // tags  */}
+          <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Tags</label>
             <TagInput
               presets={[
@@ -61,15 +118,56 @@ const Create = () => {
                 "personal",
                 "office",
               ]}
-              initialTags={["study", "Assignments"]}
-              onChange={setTags} // parent sending updater to child
-              // ie .. if any changes happen direct ly child  can update parents state anyhoww
+              initialTags={["work"]}
+              onChange={(next) =>
+                setTags(Array.from(new Set(next.map((t) => String(t).trim()))))
+              }
             />
           </div>
+          {/* // attach ing image  */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              Attach Image
+            </label>
 
-          {/* Submit Button */}
-          <button className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-            Save & Submit Note..
+   
+            <input
+              type="file"
+              accept="image/*"
+              id="fileUpload"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            {/* Styled Label as Button */}
+            <label
+              htmlFor="fileUpload"
+              className="cursor-pointer inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+            >
+              Choose File
+            </label>
+
+            {filePreview && (
+              <div className="mt-3">
+                <img
+                  src={filePreview}
+                  alt="preview"
+                  className="w-48 h-32 object-cover rounded shadow-sm"
+                />
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className={`w-full py-3 rounded-lg text-white font-semibold transition ${
+              submitting
+                ? "bg-black cursor-not-allowed"
+                : "bg-teal-500 hover:bg-teal-600"
+            }`}
+          >
+            {submitting ? "Saving..." : "Save & Submit Note"}
           </button>
         </div>
       </div>
