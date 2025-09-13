@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import TagInput from "./TagInput";
+import AuthContext from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Create = () => {
   const [tags, setTags] = useState([]);
@@ -8,6 +10,8 @@ const Create = () => {
   const [filePreview, setFilePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const { accessToken } = useContext(AuthContext) || {};
+  const navigate = useNavigate();
 
   // validations
   const validate = () => {
@@ -36,25 +40,36 @@ const Create = () => {
     setSubmitting(true);
     try {
       //  this is my temporary mock payload type will change  this sure !
+      // use provided image or default placeholder
+      const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131";
       const payload = {
-        id: Date.now(),
         title: title.trim(),
         content: content.trim(),
         tags: Array.isArray(tags) ? tags.map((t) => String(t).trim()) : [],
-        image: filePreview || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        image: filePreview || DEFAULT_IMAGE,
       };
 
-      console.log("Create payload:", payload);
+      const API = import.meta.env.VITE_API_URL || '';
+      const token = accessToken || localStorage.getItem('accessToken');
+      const res = await fetch(`${API}/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.msg || 'Create failed');
+      }
 
-      // reset form on success
+      // reset form on success and navigate home so the list reloads
       setTitle("");
       setContent("");
       setTags([]);
-      // cleared preview; file variable not stored locally on purpose
       setFilePreview(null);
-      // TODO: navigate to note detail after server returns id
+      navigate('/');
     } catch (err) {
       console.error(err);
     } finally {

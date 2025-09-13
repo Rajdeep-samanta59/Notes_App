@@ -1,19 +1,34 @@
 import React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMatchError, setPasswordMatchError] = useState("");
-  const Handlesubmit = (e) => {
+  const [name, setName] = useState("");
+  const navigate = useNavigate();
+  const Handlesubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       console.log("password mismatch ");
       return;
     }
-    console.log(email);
-    console.log(password);
+    try{
+      const API = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${API}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const b = await res.json();
+      if (!res.ok) throw new Error(b.msg || 'Signup failed');
+      alert('Signup successful, please login');
+      navigate('/login');
+    }catch(err){
+      console.error('signup failed', err);
+      alert(err.message || 'Signup failed');
+    }
   };
 
   return (
@@ -27,6 +42,25 @@ const Signup = () => {
             {/* form is startingg / */}
             <form onSubmit={Handlesubmit} className="space-y-4 md:space-y-6">
               {/* EMail */}
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Your name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Your full name"
+                  value={name}
+                  required
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                />
+              </div>
+
 
               <div>
                 <label

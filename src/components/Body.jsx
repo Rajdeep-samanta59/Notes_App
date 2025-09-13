@@ -1,28 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Search from "./Search";
 import Note from "./Note";
+import AuthContext from "../context/AuthContext";
 
 const Body = () => {
   const [data, setData] = useState([]);
   const [searcheddata, setsearcheddata] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { accessToken } = useContext(AuthContext) || {};
+  const { user } = useContext(AuthContext) || {};
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          // "https://api.myjson.online/v1/records/eec8828e-5973-4f42-b019-135092b826de"
-          "data/notes.json"
-
-        );
+        const API = import.meta.env.VITE_API_URL || '';
+        const token = accessToken || localStorage.getItem('accessToken');
+        const response = await fetch(`${API}/notes`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!response.ok) throw new Error('Failed to fetch notes');
         const json = await response.json();
-        // normalize shape
-        const items = Array.isArray(json.data)
-          ? json.data
-          : json.data?.data || [];
+        const items = json.notes || [];
         setData(items);
       } catch (err) {
         console.error("Fetch failed:", err);
@@ -33,7 +34,7 @@ const Body = () => {
     };
 
     fetchData();
-  }, []);
+  }, [accessToken]);
 
   const handlesearch = (value) => {
     setsearcheddata(value || "");
@@ -56,7 +57,10 @@ const Body = () => {
         {/*Search */}
         <Search onsearch={handlesearch} />
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Notes</h1>
+          <div>
+            <h1 className="text-2xl font-semibold">Notes</h1>
+            {user && <div className="text-sm text-gray-600">Hello {user.name}</div>}
+          </div>
           <Link
             to="/notes/new"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-600 text-white hover:bg-purple-700"
@@ -84,18 +88,21 @@ const Body = () => {
         )}
         {!loading && !error && filtered.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filtered.map((curr) => (
-              <Note
-                key={curr.id}
-                id={curr.id}
-                tags={curr.tags}
-                image={curr.image}
-                title={curr.title}
-                content={curr.content}
-                createdAt={curr.createdAt}
-                updatedAt={curr.updatedAt}
-              />
-            ))}
+            {filtered.map((curr) => {
+              const noteId = curr._id || curr.id;
+              return (
+                <Note
+                  key={noteId}
+                  id={noteId}
+                  tags={curr.tags}
+                  image={curr.image}
+                  title={curr.title}
+                  content={curr.content}
+                  createdAt={curr.createdAt}
+                  updatedAt={curr.updatedAt}
+                />
+              );
+            })}
           </div>
         )}
         

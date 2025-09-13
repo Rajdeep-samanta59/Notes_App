@@ -16,29 +16,34 @@ import Signup from "./components/Signup.jsx";
 import Create from "./components/Create.jsx";
 import NoteDetail from "./components/NoteDetail.jsx";
 import EditNote from "./components/EditNote.jsx";
+import PrivateRoute from "./components/PrivateRoute.jsx";
+import { AuthProvider } from "./context/AuthContext";
 const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
+  { path: '/signup', element: <Signup /> },
   {
-    path: "/",
-    element: <App />,
+    element: <PrivateRoute />,
     errorElement: <Error />,
     children: [
-  { index: true, element: <Body /> },
-  { path: 'notes', element: <Body /> },
-      { path: "about", element: <About /> },
-      { path: "contact", element: <Contact /> },
-      { path: "login", element: <Login /> },
-      { path: "signup", element: <Signup /> },
-  // { path: "create", element: <Create /> },
-  { path: "notes/new", element: <Create /> },
-      { path: "notes/:id", element: <NoteDetail /> },
-      { path: "notes/:id/edit", element: <EditNote /> },
-      //  { path: "notepage", element: <Notepage/> },
+      {
+        path: '/',
+        element: <App />,
+        children: [
+          { index: true, element: <Body /> },
+          { path: 'notes', element: <Body /> },
+          { path: 'about', element: <About /> },
+          { path: 'contact', element: <Contact /> },
+          { path: 'notes/new', element: <Create /> },
+          { path: 'notes/:id', element: <NoteDetail /> },
+          { path: 'notes/:id/edit', element: <EditNote /> },
+        ],
+      },
     ],
   },
 ]);
 
 createRoot(document.getElementById("root")).render(
-  // <StrictMode>
-  <RouterProvider router={router} />
-  // </StrictMode>
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 );

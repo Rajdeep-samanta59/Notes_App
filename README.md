@@ -1,6 +1,6 @@
-clone the repo by git clone "https://github.com/Rajdeep-samanta59/Notes_App.git"
-go to the folder 
-show live by npm run dev
+1) clone the repo by git clone "https://github.com/Rajdeep-samanta59/Notes_App.git"
+2) go to the folder 
+3)  show live by npm run dev
 
 #                                          DAY-1
 1 . set up React-vite done 
@@ -50,3 +50,20 @@ SECOND:
 
 THIRD:
 1)	Thinking and Learning How to Design the models,schemas;
+
+
+# DAY-9
+
+ONE 
+1) Focused on Backend
+
+TWO 
+2)	 setup localstorage in the browser to store  the access Token 
+3)   Make feature of Logout so automatically deletes accesstoken form  the Localstorage
+
+THREE
+4) Set up Context hook  by this wrapped   client  for portion to get access   of  name of  the user accesstoken and refresh token
+
+5) UPDated node.js  form 20...--> 22.... 
+Updated additionally all the dependencies  if update is available.
+

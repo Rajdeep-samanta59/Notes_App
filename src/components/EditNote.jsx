@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TagInput from "./TagInput";
+import AuthContext from "../context/AuthContext";
 
 const EditNote = () => {
   const { id } = useParams();
@@ -11,21 +12,37 @@ const EditNote = () => {
   const [tags, setTags] = useState([]);
   const [filePreview, setFilePreview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const { accessToken } = useContext(AuthContext) || {};
 
   useEffect(() => {
     const fetchNote = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(
-          "https://api.myjson.online/v1/records/eec8828e-5973-4f42-b019-135092b826de"
-        );
+        const API = import.meta.env.VITE_API_URL || '';
+        const token = accessToken || localStorage.getItem('accessToken');
+        const res = await fetch(`${API}/note/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.status === 404) {
+          setError('Note not found');
+          setNote(null);
+          return;
+        }
+        if (res.status === 401) {
+          setError('Unauthorized. Please login again.');
+          setNote(null);
+          return;
+        }
+        if (!res.ok) {
+          const b = await res.json().catch(() => ({}));
+          throw new Error(b.msg || 'Failed to fetch note');
+        }
         const json = await res.json();
-        const items = Array.isArray(json.data)
-          ? json.data
-          : json.data?.data || [];
-        const found = items.find((it) => String(it.id) === String(id));
+        const found = json.note;
         if (found) {
           setNote(found);
           setTitle(found.title || "");
@@ -35,12 +52,13 @@ const EditNote = () => {
         }
       } catch (err) {
         console.error(err);
+        setError(err.message || 'Failed to load note');
       } finally {
         setLoading(false);
       }
     };
     fetchNote();
-  }, [id]);
+  }, [id, accessToken]);
 
   const validate = () => {
     const e = {};
@@ -75,8 +93,20 @@ const EditNote = () => {
         image: filePreview || null,
         updatedAt: new Date().toISOString(),
       };
-      // TODO: replace with actual PUT/PATCH API call
-      console.log("Update payload for note", id, payload);
+      const API = import.meta.env.VITE_API_URL || '';
+  const token = accessToken || localStorage.getItem('accessToken');
+      const res = await fetch(`${API}/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.msg || 'Update failed');
+      }
       // navigate back to detail view
       navigate(`/notes/${id}`);
     } catch (err) {
@@ -87,6 +117,7 @@ const EditNote = () => {
   };
 
   if (loading) return <div className="p-8">Loading note...</div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
   if (!note) return <div className="p-8">Note not found</div>;
 
   return (

@@ -5,11 +5,12 @@ const Note = ({ id, title, image, content, tags, createdAt }) => {
   // guard dates
   const created = createdAt ? new Date(createdAt).toLocaleDateString() : "N/A";
 
+  const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131';
   return (
     <Link to={`/notes/${id}`} className="group">
       <article className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden transform transition hover:-translate-y-1 hover:shadow-lg">
         <div className="h-40 w-full bg-gray-100 overflow-hidden">
-          <img src={image || '/vite.svg'} alt={title || 'note image'} className="w-full h-full object-cover" loading="lazy" />
+          <img src={image || DEFAULT_IMAGE} alt={title || 'note image'} className="w-full h-full object-cover" loading="lazy" />
         </div>
 
         <div className="p-4 h-48 flex flex-col justify-between">

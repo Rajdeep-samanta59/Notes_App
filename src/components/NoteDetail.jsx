@@ -1,31 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
 
 const NoteDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [note, setNote] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { accessToken } = useContext(AuthContext) || {};
 
   useEffect(() => {
     const fetchNote = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(
-          // "https://api.myjson.online/v1/records/eec8828e-5973-4f42-b019-135092b826de"
-          "/data/notes.json"
-        );
+        const API = import.meta.env.VITE_API_URL || '';
+        const token = accessToken || localStorage.getItem('accessToken');
+        const res = await fetch(`${API}/note/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.status === 404) {
+          setError('Note not found');
+          setNote(null);
+          return;
+        }
+        if (res.status === 401) {
+          setError('Unauthorized. Please login again.');
+          setNote(null);
+          return;
+        }
+        if (!res.ok) {
+          const b = await res.json().catch(() => ({}));
+          throw new Error(b.msg || 'Failed to fetch note');
+        }
         const json = await res.json();
-        const items = Array.isArray(json.data)
-          ? json.data
-          : json.data?.data || [];
-        const found = items.find((it) => String(it.id) === String(id));
-        setNote(found || null);
+        setNote(json.note || null);
       } catch (err) {
         console.error(err);
+        setError(err.message || 'Failed to load note');
+      } finally {
+        setLoading(false);
       }
     };
     fetchNote();
-  }, [id]);
+  }, [id, accessToken]);
 
   const handleDelete = async () => {
     const ok = confirm("Delete this note? This cannot be undone.");
@@ -34,10 +54,19 @@ const NoteDetail = () => {
 // else
     setDeleting(true);
     try {
-      // TODO: replace with real delete API
-      console.log("Deleting note", id);
-      await new Promise((r) => setTimeout(r, 500));
-      navigate("/"); // redirect after delete
+  const API = import.meta.env.VITE_API_URL || '';
+  // try to get token from AuthContext then fallback to localStorage
+  const headerToken = accessToken || localStorage.getItem('accessToken');
+      const res = await fetch(`${API}/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(headerToken ? { Authorization: `Bearer ${headerToken}` } : {}),
+        },
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.msg || 'Delete failed');
+      navigate('/'); // redirect after delete
     } catch (err) {
       console.error("Delete failed:", err);
     } finally {
@@ -45,7 +74,9 @@ const NoteDetail = () => {
     }
   };
 
-  if (!note) return <div className="p-8">Loading note details...!</div>;
+  if (loading) return <div className="p-8">Loading note details...!</div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
+  if (!note) return <div className="p-8">Note not found</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">
