@@ -39,25 +39,23 @@ const Create = () => {
 
     setSubmitting(true);
     try {
-      //  this is my temporary mock payload type will change  this sure !
-      // use provided image or default placeholder
-      const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131";
-      const payload = {
-        title: title.trim(),
-        content: content.trim(),
-        tags: Array.isArray(tags) ? tags.map((t) => String(t).trim()) : [],
-        image: filePreview || DEFAULT_IMAGE,
-      };
-
       const API = import.meta.env.VITE_API_URL || '';
       const token = accessToken || localStorage.getItem('accessToken');
+
+      // build FormData
+      const fileInput = document.getElementById('fileUpload');
+      const fd = new FormData();
+      fd.append('title', title.trim());
+      fd.append('content', content.trim());
+      fd.append('tags', JSON.stringify(Array.isArray(tags) ? tags : [])); // Arrays/orobjects must be stringified before appending to form   Data
+      if (fileInput?.files?.[0]) fd.append('image', fileInput.files[0]);
+
       const res = await fetch(`${API}/create`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: fd,
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
@@ -152,6 +150,7 @@ const Create = () => {
               id="fileUpload"
               onChange={handleFileChange}
               className="hidden"
+              required = "true"
             />
 
             {/* Styled Label as Button */}
@@ -162,7 +161,7 @@ const Create = () => {
               Choose File
             </label>
 
-            {filePreview && (
+            {filePreview && (             // Only shows if filePreview has a value
               <div className="mt-3">
                 <img
                   src={filePreview}

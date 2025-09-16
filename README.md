@@ -67,3 +67,13 @@ THREE
 5) UPDated node.js  form 20...--> 22.... 
 Updated additionally all the dependencies  if update is available.
 
+
+# DAY-11 
+ONE 
+1) FOCUsed on Backend(what i did Updated in the  server Readme.md)
+
+TWO
+2) account creating in some platform 
+
+THREE
+3) Focused on DEployment 

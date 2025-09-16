@@ -85,23 +85,22 @@ const EditNote = () => {
 
     setSubmitting(true);
     try {
-      const payload = {
-        id: note?.id || id,
-        title: title.trim(),
-        content: content.trim(),
-        tags: Array.isArray(tags) ? tags.map((t) => String(t).trim()) : [],
-        image: filePreview || null,
-        updatedAt: new Date().toISOString(),
-      };
       const API = import.meta.env.VITE_API_URL || '';
-  const token = accessToken || localStorage.getItem('accessToken');
+      const token = accessToken || localStorage.getItem('accessToken');
+
+      const fileInput = document.getElementById('fileUpload');
+      const fd = new FormData();
+      fd.append('title', title.trim());
+      fd.append('content', content.trim());
+      fd.append('tags', JSON.stringify(Array.isArray(tags) ? tags : []));
+      if (fileInput?.files?.[0]) fd.append('image', fileInput.files[0]);
+
       const res = await fetch(`${API}/update/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: fd,
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
