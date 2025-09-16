@@ -21,15 +21,7 @@ const Signup = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
-      // Defensive pa \rse: if response isn't JSON (e.g., HTML error page), capture text and show a helpful message
-      const contentType = res.headers.get('content-type') || '';
-      let b;
-      if (contentType.includes('application/json')) {
-        b = await res.json();
-      } else {
-        const text = await res.text();
-        throw new Error(`Unexpected non-JSON response from ${API || 'current origin'}${API ? '/signup' : '/signup'} (status ${res.status}). Response starts: ${text.slice(0,120)}`);
-      }
+      const b = await res.json();
       if (!res.ok) throw new Error(b.msg || 'Signup failed');
       alert('Signup successful, please login');
       navigate('/login');

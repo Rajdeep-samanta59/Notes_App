@@ -20,16 +20,7 @@ export default function Login(){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
-  
-      const contentType = res.headers.get('content-type') || '';
-      let body;
-      if (contentType.includes('application/json')) {
-        body = await res.json();
-      } else {
-        const text = await res.text();
-        throw new Error(`Unexpected non-JSON response from ${API || 'current origin'}${API ? '/login' : '/login'} (status ${res.status}). Response starts: ${text.slice(0,120)}`);
-      }
+      const body = await res.json();
       if (!res.ok) throw new Error(body.msg || 'Login failed');
   // backend returns { accessToken, refreshToken, name, email }
   login({ accessToken: body.accessToken, refreshToken: body.refreshToken, user: { name: body.name, email: body.email } });
