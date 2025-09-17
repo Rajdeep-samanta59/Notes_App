@@ -11,30 +11,38 @@ const Signup = () => {
   const Handlesubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      console.log("password mismatch ");
+      setPasswordMatchError("Passwords do not match");
       return;
     }
-    try{
-      const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? '' : 'https://notes-app-backend-server.onrender.com');
+    try {
+      const API = import.meta.env.VITE_API_URL;
+      if (!API) {
+        throw new Error('Server URL not configured. Please set VITE_API_URL in environment variables.');
+      }
+
       const res = await fetch(`${API}/signup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ name, email, password }),
       });
-      let b;
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        b = await res.json();
-      } else {
-        const text = await res.text();
-        b = { msg: text };
+
+      // Check if response is JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Unable to connect to server at ${API}. Please check if the server is running and VITE_API_URL is correct.`);
       }
-      if (!res.ok) throw new Error(b.msg || 'Signup failed');
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.msg || 'Signup failed');
+      
       alert('Signup successful, please login');
       navigate('/login');
-    }catch(err){
-      console.error('signup failed', err);
-      alert(err.message || 'Signup failed');
+    } catch(err) {
+      console.error('Signup failed:', err);
+      alert(err.message || 'Unable to connect to server. Please try again later.');
     }
   };
 

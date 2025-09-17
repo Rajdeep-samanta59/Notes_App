@@ -14,30 +14,45 @@ export default function Login(){
     e.preventDefault();
     setLoading(true);
     try{
-      // prefer explicit VITE_API_URL; if missing and not local, fall back to deployed backend
-      const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? '' : 'https://notes-app-backend-server.onrender.com');
+      const API = import.meta.env.VITE_API_URL;
+      if (!API) {
+        throw new Error('Server URL not configured. Please set VITE_API_URL in environment variables.');
+      }
       const res = await fetch(`${API}/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ email, password }),
       });
-      // parse JSON safely — if server returned HTML (e.g. frontend index), capture the text and show a helpful error
-      let body;
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        body = await res.json();
-      } else {
-        const text = await res.text();
-        body = { msg: text };
+      
+      // Check if response is JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Unable to connect to server at ${API}. Please check if the server is running and VITE_API_URL is correct.`);
       }
+
+      const body = await res.json();
       if (!res.ok) throw new Error(body.msg || 'Login failed');
-  // backend returns { accessToken, refreshToken, name, email }
-  login({ accessToken: body.accessToken, refreshToken: body.refreshToken, user: { name: body.name, email: body.email } });
+      
+      // backend returns { accessToken, refreshToken, name, email }
+      if (!body.accessToken || !body.refreshToken) {
+        throw new Error('Invalid response from server: missing tokens');
+      }
+      
+      login({ 
+        accessToken: body.accessToken, 
+        refreshToken: body.refreshToken, 
+        user: { name: body.name, email: body.email } 
+      });
       navigate('/');
     }catch(err){
-      console.error('login failed', err);
-      alert(err.message || 'Login failed');
-    }finally{ setLoading(false); }
+      console.error('Login failed:', err);
+      alert(err.message || 'Unable to connect to server. Please try again later.');
+    }finally{ 
+      setLoading(false); 
+    }
   }
 
   return (
