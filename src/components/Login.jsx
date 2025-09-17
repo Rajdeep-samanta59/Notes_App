@@ -14,13 +14,22 @@ export default function Login(){
     e.preventDefault();
     setLoading(true);
     try{
-      const API = import.meta.env.VITE_API_URL || '';
+      // prefer explicit VITE_API_URL; if missing and not local, fall back to deployed backend
+      const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? '' : 'https://notes-app-backend-server.onrender.com');
       const res = await fetch(`${API}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const body = await res.json();
+      // parse JSON safely — if server returned HTML (e.g. frontend index), capture the text and show a helpful error
+      let body;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        body = await res.json();
+      } else {
+        const text = await res.text();
+        body = { msg: text };
+      }
       if (!res.ok) throw new Error(body.msg || 'Login failed');
   // backend returns { accessToken, refreshToken, name, email }
   login({ accessToken: body.accessToken, refreshToken: body.refreshToken, user: { name: body.name, email: body.email } });

@@ -15,13 +15,20 @@ const Signup = () => {
       return;
     }
     try{
-      const API = import.meta.env.VITE_API_URL || '';
+      const API = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? '' : 'https://notes-app-backend-server.onrender.com');
       const res = await fetch(`${API}/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       });
-      const b = await res.json();
+      let b;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        b = await res.json();
+      } else {
+        const text = await res.text();
+        b = { msg: text };
+      }
       if (!res.ok) throw new Error(b.msg || 'Signup failed');
       alert('Signup successful, please login');
       navigate('/login');
