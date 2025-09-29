@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import TagInput from "./TagInput";
 import AuthContext from "../context/AuthContext";
+import { useToast } from "./Toast";
 import { useNavigate } from "react-router-dom";
 
 const Create = () => {
@@ -12,6 +13,7 @@ const Create = () => {
   const [submitting, setSubmitting] = useState(false);
   const { accessToken } = useContext(AuthContext) || {};
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   // validations
   const validate = () => {
@@ -59,7 +61,9 @@ const Create = () => {
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
-        throw new Error(b.msg || 'Create failed');
+        const message = b.msg || 'Create failed';
+        addToast(message, 'error');
+        throw new Error(message);
       }
 
       // reset form on success and navigate home so the list reloads
@@ -67,6 +71,7 @@ const Create = () => {
       setContent("");
       setTags([]);
       setFilePreview(null);
+      addToast('Note created successfully', 'success');
       navigate('/');
     } catch (err) {
       console.error(err);

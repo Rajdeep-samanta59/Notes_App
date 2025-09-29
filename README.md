@@ -1,6 +1,62 @@
-1) clone the repo by git clone "https://github.com/Rajdeep-samanta59/Notes_App.git"
-2) go to the folder 
-3)  show live by npm run dev
+NOTES APP - FULL STACK 
+
+A simple and intuitive Notes Making / Diary app built with ReactJS, TailwindCSS, NodeJS, Express, and MongoDB.
+Easily create, edit, and delete notes in a seamless interface.
+
+---
+
+LIVE DEMO
+
+Frontend (Vercel): https://notes-cla251ig4-rajdeep-samantas-projects.vercel.app
+Backend (Render): https://notes-app-backend-server.onrender.com
+
+---
+
+RUN LOCALLY
+
+FRONTEND
+
+1. Clone the frontend repository:
+   git clone "https://github.com/Rajdeep-samanta59/Notes_App.git"
+
+2. Navigate to the project folder:
+   cd Notes_App
+
+3. Install dependencies:
+   npm install
+
+4. Start the development server:
+   npm run dev
+
+5. View the app locally:
+   Open your browser and go to:
+   http://localhost:5173
+
+---
+
+BACKEND
+
+1. Clone the backend repository:
+   git clone "https://github.com/Rajdeep-samanta59/Notes_App_Backend.git"
+
+2. Navigate to the backend folder:
+   cd Notes_App_Backend
+
+3. Install dependencies:
+   npm install
+
+4. Start the backend server:
+   npm run dev
+
+5. Verify backend is running:
+   Open your browser and go to:
+   http://localhost:8000
+   You should see: "Server is running Smooth!" if everything is fine.
+
+---
+
+
+# TASK DONE 
 
 #                                          DAY-1
 1 . set up React-vite done 
