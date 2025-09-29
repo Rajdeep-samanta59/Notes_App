@@ -58,8 +58,8 @@ const Body = () => {
         <Search onsearch={handlesearch} />
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-semibold">Notes</h1>
-            {user && <div className="text-sm text-gray-600">Hello {user.name}</div>}
+            {/* <h1 className="text-2xl font-semibold">Notes</h1> */}
+            {user && <div className="text-sm text-gray-600">👋Hello {user.name} Be Super Productive Today</div>}
           </div>
           <Link
             to="/notes/new"
