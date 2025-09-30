@@ -7,7 +7,7 @@ Easily create, edit, and delete notes in a seamless interface.
 
 LIVE DEMO
 
-Frontend (Vercel): https://notes-cla251ig4-rajdeep-samantas-projects.vercel.app
+Frontend (Vercel): https://notes-app-omega-ruby.vercel.app
 Backend (Render): https://notes-app-backend-server.onrender.com
 
 ---
