@@ -6,6 +6,9 @@ import AuthContext from "../context/AuthContext";
 
 const Body = () => {
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(8); // show 8 notes per page as requested
+  const [total, setTotal] = useState(0);
   const [searcheddata, setsearcheddata] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,18 +16,25 @@ const Body = () => {
   const { user } = useContext(AuthContext) || {};
 
   useEffect(() => {
-    const fetchData = async () => {
+    // fetch notes helper used by search and pagination
+    const fetchNotes = async (p = 1, q = '') => {
       setLoading(true);
       try {
         const API = import.meta.env.VITE_API_URL || '';
         const token = accessToken || localStorage.getItem('accessToken');
-        const response = await fetch(`${API}/notes`, {
+        const params = new URLSearchParams();
+        params.set('page', String(p));
+        params.set('limit', String(limit));
+        if (q) params.set('q', q);
+        const response = await fetch(`${API}/notes?${params.toString()}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!response.ok) throw new Error('Failed to fetch notes');
         const json = await response.json();
         const items = json.notes || [];
         setData(items);
+        setTotal(json.total || 0);
+        setPage(json.page || p);
       } catch (err) {
         console.error("Fetch failed:", err);
         setError("Failed to load notes");
@@ -33,8 +43,10 @@ const Body = () => {
       }
     };
 
-    fetchData();
-  }, [accessToken]);
+    // initial load or when access token changes: load current page with current search term
+    fetchNotes(page, searcheddata);
+    // expose fetchNotes by attaching to ref is unnecessary; we'll call fetchNotes directly from handlers
+  }, [accessToken, page, limit, searcheddata]);
 
   const handlesearch = (value) => {
     setsearcheddata(value || "");
@@ -86,24 +98,63 @@ const Body = () => {
             </Link>
           </div>
         )}
-        {!loading && !error && filtered.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filtered.map((curr) => {
-              const noteId = curr._id || curr.id;
-              return (
-                <Note
-                  key={noteId}
-                  id={noteId}
-                  tags={curr.tags}
-                  image={curr.image}
-                  title={curr.title}
-                  content={curr.content}
-                  createdAt={curr.createdAt}
-                  updatedAt={curr.updatedAt}
-                />
-              );
-            })}
-          </div>
+        {!loading && !error && data.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {data.map((curr) => {
+                const noteId = curr._id || curr.id;
+                return (
+                  <Note
+                    key={noteId}
+                    id={noteId}
+                    tags={curr.tags}
+                    image={curr.image}
+                    title={curr.title}
+                    content={curr.content}
+                    createdAt={curr.createdAt}
+                    updatedAt={curr.updatedAt}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Pagination controls */}
+            <div className="mt-6 flex justify-center items-center gap-2">
+              {Array.from({ length: Math.max(1, Math.ceil(total / limit)) }).map((_, idx) => {
+                const p = idx + 1;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      // fetch that page
+                      (async () => {
+                        setLoading(true);
+                        try {
+                          const API = import.meta.env.VITE_API_URL || '';
+                          const token = accessToken || localStorage.getItem('accessToken');
+                          const params = new URLSearchParams();
+                          params.set('page', String(p));
+                          params.set('limit', String(limit));
+                          const resp = await fetch(`${API}/notes?${params.toString()}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+                          const json = await resp.json();
+                          setData(json.notes || []);
+                          setPage(json.page || p);
+                          setTotal(json.total || 0);
+                        } catch (e) {
+                          console.error('Pagination fetch failed', e);
+                        } finally {
+                          setLoading(false);
+                        }
+                      })();
+                    }}
+                    className={`px-3 py-1 rounded ${p === page ? 'bg-purple-600 text-white' : 'bg-gray-100'}`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
         
       </div>
