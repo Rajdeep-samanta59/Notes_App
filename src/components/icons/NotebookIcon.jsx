@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function NotebookIcon({ width = 40, height = 40, className = '' }) {
+export default function NotebookIcon({ width = 40, height = 41, className = '' }) {
   return (
     <svg
       width={width}
