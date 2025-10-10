@@ -133,3 +133,11 @@ TWO
 
 THREE
 3) Focused on DEployment 
+
+# DAY -12
+
+1) Pagination introduced
+
+2) Title and Logo of the Website changed form  the default vite-react  logo and name ;
+
+3) Made it realestic .
